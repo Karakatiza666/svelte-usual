@@ -28,21 +28,26 @@
    export let isInteger = true
    export let value: BigNumber | undefined
    let currentValue: BigNumber | undefined // Helps avoid unnecessary setValue() calls
-   export let id: string | undefined
+   export let id: string | undefined = undefined
    // If both isInteger and decimals are set - decimals are applied to result, but it is not trimmed to integer
    export let decimals = 0
    export let disabled = false
-   export let max: number | undefined
+   export let max: number | BigNumber | undefined = undefined // maximum value does not account for decimals
    let class_ = ''
    export { class_ as class }
    let curString = nonNull(value) ? value.div(10 ** decimals).toFixed() : ''
    let previousN = curString
    $: {
-      if ((nonNull(value) && value !== currentValue) || value?.gt(max ?? 0)) {
+      if (nonNull(value) && (value !== currentValue || !max || value.gt(max))) {
          currentValue = value
          setValue({
             currentTarget: {
-               value: BigNumber.minimum(value.div(10 ** decimals), max ?? 0).toFixed(),
+               value: (max
+                  ? ((m) => BigNumber.minimum(value, m))(typeof max == 'number' ? max : max)
+                  : value
+               )
+                  .div(10 ** decimals)
+                  .toFixed(),
                min: '0'
             }
          })
