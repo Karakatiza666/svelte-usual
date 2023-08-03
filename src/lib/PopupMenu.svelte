@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
    import { onMount } from 'svelte'
    import { createEventDispatcher } from 'svelte'
 
@@ -34,10 +35,14 @@
       document.removeEventListener('keyup', handleEscape, false)
    }
 
-   onMount(() => unsubscribe) // remove events when element is removed from the DOM)
+   onMount(() => {
+      return unsubscribe
+   }) // remove events when element is removed from the DOM)
 
    $: {
-      setTimeout(show ? subscribe : unsubscribe)
+      if (browser) {
+         setTimeout(show ? subscribe : unsubscribe)
+      }
    }
 </script>
 
